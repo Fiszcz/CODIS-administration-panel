@@ -19,15 +19,8 @@ import SettingsSystemDaydream from '@material-ui/icons/SettingsSystemDaydream';
 import Settings from '@material-ui/icons/Settings';
 import DesktopWindows from '@material-ui/icons/DesktopWindows';
 import AssignmentTurnedIn from '@material-ui/icons/AssignmentTurnedIn';
-import {
-    BrowserRouter as Router,
-    Route,
-    NavLink,
-    withRouter,
-    RouteComponentProps,
-    Redirect,
-    Switch
-} from "react-router-dom";
+import {BrowserRouter as Router, NavLink, Redirect, Route, Switch} from "react-router-dom";
+import {NodesTableStyled} from "./components/NodesPage/NodesTable";
 
 const drawerWidth = 240;
 
@@ -108,14 +101,10 @@ const styles: (theme: Theme) => StyleRules = ({transitions, spacing, zIndex, bre
     }
 });
 
-interface Props extends WithStyles<typeof styles>, RouteComponentProps {
+interface Props extends WithStyles<typeof styles> {
 }
 
 class App extends React.Component<Props> {
-
-    constructor(props: Props) {
-        super(props);
-    }
 
     state = {
         open: false,
@@ -132,8 +121,6 @@ class App extends React.Component<Props> {
     render() {
         // @ts-ignore
         const {classes, theme} = this.props;
-
-        console.log(this.props.location);
 
         return (
             <div className={classes.root}>
@@ -216,7 +203,7 @@ class App extends React.Component<Props> {
                         <Switch>
                             <Route path="/system">System</Route>
                             <Route path="/tasks">Tasks</Route>
-                            <Route path="/nodes">Nodes</Route>
+                            <Route path="/nodes" component={NodesTableStyled}/>
                             <Route path="/settings">Settings</Route>
                             <Redirect exact from="/" to="/system"/>
                         </Switch>
@@ -227,4 +214,4 @@ class App extends React.Component<Props> {
     }
 }
 
-export const AppWithStyles = withStyles(styles, {withTheme: true})(withRouter(App));
+export const AppWithStyles = withStyles(styles, {withTheme: true})(App);

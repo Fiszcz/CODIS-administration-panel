@@ -1,7 +1,7 @@
 {
     "extends": "tslint:latest",
     "rules": {
-        "no-unnecessary-type-assertion": true,
+        "no-unnecessary-type-assertion": false,
 
         "array-type": [true, "array"],
         "boolean-trivia": true,
