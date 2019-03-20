@@ -6,21 +6,21 @@ import TableRow from "@material-ui/core/TableRow";
 import TableHead from "@material-ui/core/TableHead";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 
-const rows = [
-    { id: 'name', numeric: false, disablePadding: true, label: 'Dessert (100g serving)' },
-    { id: 'calories', numeric: true, disablePadding: false, label: 'Calories' },
-    { id: 'fat', numeric: true, disablePadding: false, label: 'Fat (g)' },
-    { id: 'carbs', numeric: true, disablePadding: false, label: 'Carbs (g)' },
-    { id: 'protein', numeric: true, disablePadding: false, label: 'Protein (g)' },
-];
+interface row {
+    id: string;
+    numeric: boolean;
+    disablePadding: boolean;
+    label: string;
+}
 
 interface NodesTableHeaderProps {
-    numSelected: number,
-    onRequestSort: any,
-    onSelectAllClick: any,
-    order: "desc" | "asc",
-    orderBy: string,
-    rowCount: number,
+    rows: row[];
+    numSelected: number;
+    onRequestSort: any;
+    onSelectAllClick: any;
+    order: "desc" | "asc";
+    orderBy: string;
+    rowCount: number;
 }
 
 export class NodesTableHeader extends React.Component<NodesTableHeaderProps> {
@@ -29,7 +29,7 @@ export class NodesTableHeader extends React.Component<NodesTableHeaderProps> {
     };
 
     render() {
-        const { onSelectAllClick, order, orderBy, numSelected, rowCount } = this.props;
+        const { onSelectAllClick, order, orderBy, numSelected, rowCount, rows } = this.props;
 
         return (
             <TableHead>
@@ -45,7 +45,7 @@ export class NodesTableHeader extends React.Component<NodesTableHeaderProps> {
                         row => (
                             <TableCell
                                 key={row.id}
-                                align={row.numeric ? 'right' : 'left'}
+                                align={row.numeric ? 'right' : 'center'}
                                 padding={row.disablePadding ? 'none' : 'default'}
                                 sortDirection={orderBy === row.id ? order : false}
                             >
@@ -64,7 +64,6 @@ export class NodesTableHeader extends React.Component<NodesTableHeaderProps> {
                                 </Tooltip>
                             </TableCell>
                         ),
-                        this,
                     )}
                 </TableRow>
             </TableHead>

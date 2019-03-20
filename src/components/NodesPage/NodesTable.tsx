@@ -1,5 +1,5 @@
 import React from 'react';
-import {createStyles, Theme, WithStyles, withStyles} from '@material-ui/core/styles';
+import {createStyles, WithStyles, withStyles} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -9,41 +9,19 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import {NodesTableToolbarStyled} from "./NodesTableToolbar";
 import {NodesTableHeader} from "./NodesTableHeader";
+import {getSorting, stableSort} from "../../utils/sorting";
+import {ExecutiveNode} from "../../Client/Api";
 
-function desc(a:any , b:any, orderBy:any) {
-    if (b[orderBy] < a[orderBy]) {
-        return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-        return 1;
-    }
-    return 0;
-}
+const rows = [
+    { id: 'id', numeric: false, disablePadding: true, label: 'Id' },
+    { id: 'startupDate', numeric: false, disablePadding: false, label: 'Startup Time' },
+];
 
-function stableSort(array: any, cmp: any) {
-    const stabilizedThis = array.map((el: any, index: any) => [el, index]);
-    stabilizedThis.sort((a: any, b: any) => {
-        const order = cmp(a[0], b[0]);
-        if (order !== 0) return order;
-        return a[1] - b[1];
-    });
-    return stabilizedThis.map((el:any) => el[0]);
-}
-
-function getSorting(order: any, orderBy: any) {
-    return order === 'desc' ? (a:any, b:any) => desc(a, b, orderBy) : (a:any, b:any) => -desc(a, b, orderBy);
-}
-let counter = 0;
-
-function createData(name: string, calories: number, fat: number, carbs: number, protein: number) {
-    counter += 1;
-    return { id: counter, name, calories, fat, carbs, protein };
-}
 interface NodesTableState {
     order: 'desc' | 'asc';
     orderBy: string;
-    selected: any[];
-    data: any[];
+    selected: ExecutiveNode[];
+    data: ExecutiveNode[];
     page: number;
     rowsPerPage: number;
 }
@@ -61,80 +39,24 @@ const styles = () => createStyles({
 });
 
 class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableState> {
+
     state = {
         order: 'asc' as 'desc' | 'asc',
-        orderBy: 'calories',
+        orderBy: 'startupDate',
         selected: [],
         data: [
-            createData('Cupcake', 305, 3.7, 67, 4.3),
-            createData('Donut', 452, 25.0, 51, 4.9),
-            createData('Eclair', 262, 16.0, 24, 6.0),
-            createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-            createData('Gingerbread', 356, 16.0, 49, 3.9),
-            createData('Honeycomb', 408, 3.2, 87, 6.5),
-            createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-            createData('Jelly Bean', 375, 0.0, 94, 0.0),
-            createData('KitKat', 518, 26.0, 65, 7.0),
-            createData('Lollipop', 392, 0.2, 98, 0.0),
-            createData('Marshmallow', 318, 0, 81, 2.0),
-            createData('Nougat', 360, 19.0, 9, 37.0),
-            createData('Oreo', 437, 18.0, 63, 4.0),
+            {
+                id: 'fg3k34en2k4js3',
+                startupDate: (new Date()).toLocaleTimeString(),
+            },
+            {
+                id: 'dfk43jk2ndsk24k',
+                startupDate: (new Date()).toLocaleTimeString(),
+            }
         ],
         page: 0,
         rowsPerPage: 5,
     };
-
-    handleRequestSort = (event:any, property:any) => {
-        const orderBy = property;
-        let order = 'desc';
-
-        if (this.state.orderBy === property && this.state.order === 'desc') {
-            order = 'asc';
-        }
-
-        this.setState({ order: order as 'desc' | 'asc', orderBy });
-    };
-
-    handleSelectAllClick = (event:any) => {
-        if (event.target.checked) {
-            this.setState(state => ({ selected: state.data.map((n:any) => n.id) }));
-            return;
-        }
-        this.setState({ selected: [] });
-    };
-
-    handleClick = (event:any, id:number) => {
-        const { selected } = this.state;
-        // @ts-ignore
-        const selectedIndex = selected.indexOf(id);
-        let newSelected: any[] = [];
-
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1),
-            );
-        }
-
-        this.setState({ selected: newSelected });
-    };
-
-    handleChangePage = (event:any, page:any) => {
-        this.setState({ page });
-    };
-
-    handleChangeRowsPerPage = (event:any) => {
-        this.setState({ rowsPerPage: event.target.value });
-    };
-
-    // @ts-ignore
-    isSelected = (id:any) => this.state.selected.indexOf(id) !== -1;
 
     render() {
         const { classes } = this.props;
@@ -153,11 +75,12 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
                             onSelectAllClick={this.handleSelectAllClick}
                             onRequestSort={this.handleRequestSort}
                             rowCount={data.length}
+                            rows={rows}
                         />
                         <TableBody>
                             {stableSort(data, getSorting(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((n:any) => {
+                                .map((n: ExecutiveNode) => {
                                     const isSelected = this.isSelected(n.id);
                                     return (
                                         <TableRow
@@ -172,13 +95,10 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
                                             <TableCell padding="checkbox">
                                                 <Checkbox checked={isSelected} />
                                             </TableCell>
-                                            <TableCell component="th" scope="row" padding="none">
-                                                {n.name}
+                                            <TableCell component="th" scope="row" padding="none" align="center">
+                                                {n.id}
                                             </TableCell>
-                                            <TableCell align="right">{n.calories}</TableCell>
-                                            <TableCell align="right">{n.fat}</TableCell>
-                                            <TableCell align="right">{n.carbs}</TableCell>
-                                            <TableCell align="right">{n.protein}</TableCell>
+                                            <TableCell align="center">{n.startupDate}</TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -208,6 +128,59 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
             </Paper>
         );
     }
+
+    private handleRequestSort = (event: Event, property: string) => {
+        const orderBy = property;
+        let order = 'desc';
+
+        if (this.state.orderBy === property && this.state.order === 'desc') {
+            order = 'asc';
+        }
+
+        this.setState({ order: order as 'desc' | 'asc', orderBy });
+    };
+
+    private handleSelectAllClick = (event: any) => {
+        if (event.target.checked) {
+            this.setState(state => ({ selected: state.data.map((n:any) => n.id) }));
+            return;
+        }
+        this.setState({ selected: [] });
+    };
+
+    private handleClick = (event: any, id: string) => {
+        const { selected } = this.state;
+        // @ts-ignore
+        const selectedIndex = selected.indexOf(id);
+        let newSelected: any[] = [];
+
+        if (selectedIndex === -1) {
+            newSelected = newSelected.concat(selected, id);
+        } else if (selectedIndex === 0) {
+            newSelected = newSelected.concat(selected.slice(1));
+        } else if (selectedIndex === selected.length - 1) {
+            newSelected = newSelected.concat(selected.slice(0, -1));
+        } else if (selectedIndex > 0) {
+            newSelected = newSelected.concat(
+                selected.slice(0, selectedIndex),
+                selected.slice(selectedIndex + 1),
+            );
+        }
+
+        this.setState({ selected: newSelected });
+    };
+
+    private handleChangePage = (event: any, page: number) => {
+        this.setState({ page });
+    };
+
+    private handleChangeRowsPerPage = (event:any) => {
+        this.setState({ rowsPerPage: event.target.value });
+    };
+
+    // @ts-ignore
+    private isSelected = (id:any) => this.state.selected.indexOf(id) !== -1;
+
 }
 
 export const NodesTableStyled = withStyles(styles)(NodesTable);
