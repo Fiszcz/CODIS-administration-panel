@@ -7,21 +7,25 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
-import {NodesTableToolbarStyled} from "./NodesTableToolbar";
-import {NodesTablHeadereStyled} from "./NodesTableHeader";
 import {getSorting, stableSort} from "../../utils/sorting";
-import {ExecutiveNode} from "../../Client/Api";
+import {Task} from "../../Client/Api";
+import {TasksTableToolbarStyled} from "./TasksTableToolbar";
+import {TasksTableHeaderStyled} from "./TasksTableHeader";
+import {TimeField} from "../TimeField/TimeField";
 
 const rows = [
     { id: 'id', numeric: false, disablePadding: true, label: 'Id' },
-    { id: 'startupDate', numeric: false, disablePadding: false, label: 'Startup Time' },
+    { id: 'createdTime', numeric: false, disablePadding: true, label: 'Created Time' },
+    { id: 'takeTime', numeric: false, disablePadding: true, label: 'Take Time' },
+    { id: 'endTime', numeric: false, disablePadding: true, label: 'End Time' },
+    { id: 'node', numeric: false, disablePadding: true, label: 'Node' },
 ];
 
-interface NodesTableState {
+interface TasksTableState {
     order: 'desc' | 'asc';
     orderBy: string;
-    selected: ExecutiveNode[];
-    data: ExecutiveNode[];
+    selected: Task[];
+    data: Task[];
     page: number;
     rowsPerPage: number;
 }
@@ -39,9 +43,12 @@ const styles = () => createStyles({
     checkboxWidth: {
         width: '1px',
     },
+    tableCell: {
+        padding: '0px !important',
+    }
 });
 
-class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableState> {
+class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableState> {
 
     state = {
         order: 'asc' as 'desc' | 'asc',
@@ -50,11 +57,17 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
         data: [
             {
                 id: 'fg3k34en2k4js3',
-                startupDate: (new Date()).toLocaleTimeString(),
+                createdTime: new Date(),
+                takeTime: new Date(),
+                endTime: null,
+                node: 'gfdk2jsfo32o',
             },
             {
                 id: 'dfk43jk2ndsk24k',
-                startupDate: (new Date()).toLocaleTimeString(),
+                createdTime: new Date(),
+                takeTime: new Date(2015, 1, 12),
+                endTime: new Date(),
+                node: 'lfsl351opeodsks',
             }
         ],
         page: 0,
@@ -68,10 +81,10 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
 
         return (
             <Paper className={classes.root}>
-                <NodesTableToolbarStyled numSelected={selected.length} />
+                <TasksTableToolbarStyled numSelected={selected.length} />
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table} aria-labelledby="tableTitle">
-                        <NodesTablHeadereStyled
+                        <TasksTableHeaderStyled
                             numSelected={selected.length}
                             order={order as 'desc' | 'asc'}
                             orderBy={orderBy}
@@ -83,7 +96,7 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
                         <TableBody>
                             {stableSort(data, getSorting(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((n: ExecutiveNode) => {
+                                .map((n: Task) => {
                                     const isSelected = this.isSelected(n.id);
                                     return (
                                         <TableRow
@@ -98,10 +111,17 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
                                             <TableCell padding="checkbox" className={classes.checkboxWidth}>
                                                 <Checkbox checked={isSelected} />
                                             </TableCell>
-                                            <TableCell component="th" scope="row" padding="none" align="center">
-                                                {n.id}
+                                            <TableCell align="center" className={classes.tableCell}><b>{n.id}</b></TableCell>
+                                            <TableCell align="center" className={classes.tableCell}>
+                                                {TimeField({date: n.createdTime})}
                                             </TableCell>
-                                            <TableCell align="center">{n.startupDate}</TableCell>
+                                            <TableCell align="center" className={classes.tableCell}>
+                                                {TimeField({date: n.takeTime})}
+                                            </TableCell>
+                                            <TableCell align="center" className={classes.tableCell}>
+                                                {TimeField({date: n.endTime})}
+                                            </TableCell>
+                                            <TableCell align="center" className={classes.tableCell}>{n.node}</TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -186,4 +206,4 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
 
 }
 
-export const NodesTableStyled = withStyles(styles)(NodesTable);
+export const TasksTableStyled = withStyles(styles)(TasksTable);

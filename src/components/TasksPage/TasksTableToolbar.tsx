@@ -34,7 +34,7 @@ const toolbarStyles = (theme: Theme) => ({
     },
 });
 
-const NodesTableToolbar = (props: any) => {
+const TasksTableToolbar = (props: any) => {
     const { numSelected, classes } = props;
 
     return (
@@ -50,7 +50,7 @@ const NodesTableToolbar = (props: any) => {
                     </Typography>
                 ) : (
                     <Typography variant="h6" id="tableTitle">
-                        Nodes
+                        Tasks
                     </Typography>
                 )}
             </div>
@@ -74,4 +74,4 @@ const NodesTableToolbar = (props: any) => {
     );
 };
 
-export const NodesTableToolbarStyled = withStyles(toolbarStyles)(NodesTableToolbar);
+export const TasksTableToolbarStyled = withStyles(toolbarStyles)(TasksTableToolbar);

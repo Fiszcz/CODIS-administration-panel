@@ -9,7 +9,7 @@ import {createStyles, WithStyles, withStyles} from "@material-ui/core";
 
 const styles = () => createStyles({
     marginForIcon: {
-            paddingLeft: '24px !important',
+        paddingLeft: '20px !important',
     },
 });
 
@@ -30,7 +30,7 @@ interface NodesTableHeaderProps {
     rowCount: number;
 }
 
-export class NodesTableHeader extends React.Component<NodesTableHeaderProps & WithStyles<typeof styles>> {
+export class TasksTableHeader extends React.Component<NodesTableHeaderProps & WithStyles<typeof styles>> {
     createSortHandler = (property:any) => (event:any) => {
         this.props.onRequestSort(event, property);
     };
@@ -80,4 +80,4 @@ export class NodesTableHeader extends React.Component<NodesTableHeaderProps & Wi
     }
 }
 
-export const NodesTablHeadereStyled = withStyles(styles)(NodesTableHeader);
+export const TasksTableHeaderStyled = withStyles(styles)(TasksTableHeader);

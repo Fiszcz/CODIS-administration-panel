@@ -21,6 +21,7 @@ import DesktopWindows from '@material-ui/icons/DesktopWindows';
 import AssignmentTurnedIn from '@material-ui/icons/AssignmentTurnedIn';
 import {BrowserRouter as Router, NavLink, Redirect, Route, Switch} from "react-router-dom";
 import {NodesTableStyled} from "./components/NodesPage/NodesTable";
+import {TasksTableStyled} from "./components/TasksPage/TasksTable";
 
 const drawerWidth = 240;
 
@@ -202,7 +203,7 @@ class App extends React.Component<Props> {
                         <div className={classes.toolbar}/>
                         <Switch>
                             <Route path="/system">System</Route>
-                            <Route path="/tasks">Tasks</Route>
+                            <Route path="/tasks" component={TasksTableStyled}/>
                             <Route path="/nodes" component={NodesTableStyled}/>
                             <Route path="/settings">Settings</Route>
                             <Redirect exact from="/" to="/system"/>

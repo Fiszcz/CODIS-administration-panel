@@ -6,8 +6,9 @@ export interface ExecutiveNode {
 export interface Task {
     id: string;
     node: string;
-    takeTime: number;
-    endTime: number;
+    createdTime: Date | null;
+    takeTime: Date | null;
+    endTime: Date | null;
 
     task?: any;
     solution?: any;
