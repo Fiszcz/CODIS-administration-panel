@@ -58,7 +58,7 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
             }
         ],
         page: 0,
-        rowsPerPage: 5,
+        rowsPerPage: 10,
     };
 
     render() {
@@ -99,7 +99,7 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
                                                 <Checkbox checked={isSelected} />
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" align="center">
-                                                {n.id}
+                                                <b>{n.id}</b>
                                             </TableCell>
                                             <TableCell align="center">{n.startupDate}</TableCell>
                                         </TableRow>
