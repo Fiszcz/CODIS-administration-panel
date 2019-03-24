@@ -21,3 +21,9 @@ export interface System {
     nodes: number;
     startupDate: number;
 }
+
+export interface ControlPoint {
+    time: Date;
+    message: string;
+    assignation: 'primary' | 'warning' | 'error' | 'success' | 'custom' | '';
+}

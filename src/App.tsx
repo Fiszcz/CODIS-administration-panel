@@ -1,6 +1,14 @@
 import React from 'react';
 import classNames from 'classnames';
-import {createStyles, StyleRules, Theme, WithStyles, withStyles} from '@material-ui/core/styles';
+import {
+    createMuiTheme,
+    createStyles,
+    MuiThemeProvider,
+    StyleRules,
+    Theme,
+    WithStyles,
+    withStyles
+} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -22,6 +30,8 @@ import AssignmentTurnedIn from '@material-ui/icons/AssignmentTurnedIn';
 import {BrowserRouter as Router, NavLink, Redirect, Route, Switch} from "react-router-dom";
 import {NodesTableStyled} from "./components/NodesPage/NodesTable";
 import {TasksTableStyled} from "./components/TasksPage/TasksTable";
+import {SystemPageStyled} from "./components/SystemPage/SystemPage";
+import {Button} from "@material-ui/core";
 
 const drawerWidth = 240;
 
@@ -87,8 +97,14 @@ const styles: (theme: Theme) => StyleRules = ({transitions, spacing, zIndex, bre
     },
     activeLink: {
         '& > *': {
-            backgroundColor: '#3f51b5cf !important',
-        }
+            backgroundColor: '#15517e !important',
+        },
+        '& > * > *': {
+            color: 'white !important',
+        },
+        '& > * > * > *': {
+            color: 'white !important',
+        },
     },
     listLinks: {
         '& > *': {
@@ -100,6 +116,23 @@ const styles: (theme: Theme) => StyleRules = ({transitions, spacing, zIndex, bre
         paddingBottom: 15,
         marginBottom: 8,
     }
+});
+
+const overrideTheme = createMuiTheme({
+    palette: {
+        primary: {
+            light: '#1585b7',
+            main: '#15517e',
+            // dark: will be calculated from palette.secondary.main,
+            contrastText: '#ffffff',
+        },
+        secondary: {
+            light: '#1690c8',
+            main: '#1672a6',
+            // dark: will be calculated from palette.secondary.main,
+            contrastText: '#ffffff',
+        },
+    },
 });
 
 interface Props extends WithStyles<typeof styles> {
@@ -124,93 +157,96 @@ class App extends React.Component<Props> {
         const {classes, theme} = this.props;
 
         return (
-            <div className={classes.root}>
-                <CssBaseline/>
-                <AppBar
-                    position="fixed"
-                    className={classNames(classes.appBar, {
-                        [classes.appBarShift]: this.state.open,
-                    })}
-                >
-                    <Toolbar disableGutters={!this.state.open}>
-                        <IconButton
-                            color="inherit"
-                            aria-label="Open drawer"
-                            onClick={this.handleDrawerOpen}
-                            className={classNames(classes.menuButton, {
-                                [classes.hide]: this.state.open,
-                            })}
-                        >
-                            <MenuIcon/>
-                        </IconButton>
-                        <Typography variant="h6" color="inherit" noWrap>
-                            CODIS - Administration panel
-                        </Typography>
-                    </Toolbar>
-                </AppBar>
-                <Router>
-                    <Drawer
-                        variant="permanent"
-                        className={classNames(classes.drawer, {
-                            [classes.drawerOpen]: this.state.open,
-                            [classes.drawerClose]: !this.state.open,
+            <MuiThemeProvider theme={overrideTheme}>
+                <div className={classes.root}>
+                    <CssBaseline/>
+                    <AppBar
+                        position="fixed"
+                        className={classNames(classes.appBar, {
+                            [classes.appBarShift]: this.state.open,
                         })}
-                        classes={{
-                            paper: classNames({
+                    >
+                        <Toolbar disableGutters={!this.state.open}>
+                            <IconButton
+                                color="inherit"
+                                aria-label="Open drawer"
+                                onClick={this.handleDrawerOpen}
+                                className={classNames(classes.menuButton, {
+                                    [classes.hide]: this.state.open,
+                                })}
+                            >
+                                <MenuIcon/>
+                            </IconButton>
+                            <Typography variant="h6" color="inherit" noWrap style={{flexGrow: 1}}>
+                                CODIS - Administration panel
+                            </Typography>
+                            <Button color="inherit" variant={'outlined'} style={{marginRight: '20px'}}>Logout</Button>
+                        </Toolbar>
+                    </AppBar>
+                    <Router>
+                        <Drawer
+                            variant="permanent"
+                            className={classNames(classes.drawer, {
                                 [classes.drawerOpen]: this.state.open,
                                 [classes.drawerClose]: !this.state.open,
-                            }),
-                        }}
-                        open={this.state.open}
-                    >
-                        <div className={classes.toolbar}>
-                            <IconButton onClick={this.handleDrawerClose}>
-                                {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
-                            </IconButton>
-                        </div>
-                        <Divider/>
-                        <List className={classes.listLinks}>
-                            <NavLink to="/system" activeClassName={classes.activeLink}>
-                                <ListItem button className={classes.listItem}>
-                                    <ListItemIcon><SettingsSystemDaydream/></ListItemIcon>
-                                    <ListItemText primary={'System'}/>
-                                </ListItem>
-                            </NavLink>
-                            <NavLink to="/tasks" activeClassName={classes.activeLink}>
-                                <ListItem button className={classes.listItem}>
-                                    <ListItemIcon><AssignmentTurnedIn/></ListItemIcon>
-                                    <ListItemText primary={'Tasks'}/>
-                                </ListItem>
-                            </NavLink>
-                            <NavLink to="/nodes" activeClassName={classes.activeLink}>
-                                <ListItem button className={classes.listItem}>
-                                    <ListItemIcon><DesktopWindows/></ListItemIcon>
-                                    <ListItemText primary={'Nodes'}/>
-                                </ListItem>
-                            </NavLink>
-                        </List>
-                        <Divider/>
-                        <List className={classes.listLinks}>
-                            <NavLink to="/settings" activeClassName={classes.activeLink}>
-                                <ListItem button className={classes.listItem}>
-                                    <ListItemIcon><Settings/></ListItemIcon>
-                                    <ListItemText primary={'Settings'}/>
-                                </ListItem>
-                            </NavLink>
-                        </List>
-                    </Drawer>
-                    <main className={classes.content}>
-                        <div className={classes.toolbar}/>
-                        <Switch>
-                            <Route path="/system">System</Route>
-                            <Route path="/tasks" component={TasksTableStyled}/>
-                            <Route path="/nodes" component={NodesTableStyled}/>
-                            <Route path="/settings">Settings</Route>
-                            <Redirect exact from="/" to="/system"/>
-                        </Switch>
-                    </main>
-                </Router>
-            </div>
+                            })}
+                            classes={{
+                                paper: classNames({
+                                    [classes.drawerOpen]: this.state.open,
+                                    [classes.drawerClose]: !this.state.open,
+                                }),
+                            }}
+                            open={this.state.open}
+                        >
+                            <div className={classes.toolbar}>
+                                <IconButton onClick={this.handleDrawerClose}>
+                                    {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
+                                </IconButton>
+                            </div>
+                            <Divider/>
+                            <List className={classes.listLinks}>
+                                <NavLink to="/system" activeClassName={classes.activeLink}>
+                                    <ListItem button className={classes.listItem}>
+                                        <ListItemIcon><SettingsSystemDaydream/></ListItemIcon>
+                                        <ListItemText primary={'System'}/>
+                                    </ListItem>
+                                </NavLink>
+                                <NavLink to="/tasks" activeClassName={classes.activeLink}>
+                                    <ListItem button className={classes.listItem}>
+                                        <ListItemIcon><AssignmentTurnedIn/></ListItemIcon>
+                                        <ListItemText primary={'Tasks'}/>
+                                    </ListItem>
+                                </NavLink>
+                                <NavLink to="/nodes" activeClassName={classes.activeLink}>
+                                    <ListItem button className={classes.listItem}>
+                                        <ListItemIcon><DesktopWindows/></ListItemIcon>
+                                        <ListItemText primary={'Nodes'}/>
+                                    </ListItem>
+                                </NavLink>
+                            </List>
+                            <Divider/>
+                            <List className={classes.listLinks}>
+                                <NavLink to="/settings" activeClassName={classes.activeLink}>
+                                    <ListItem button className={classes.listItem}>
+                                        <ListItemIcon><Settings/></ListItemIcon>
+                                        <ListItemText primary={'Settings'}/>
+                                    </ListItem>
+                                </NavLink>
+                            </List>
+                        </Drawer>
+                        <main className={classes.content}>
+                            <div className={classes.toolbar}/>
+                            <Switch>
+                                <Route path="/system" component={SystemPageStyled}/>
+                                <Route path="/tasks" component={TasksTableStyled}/>
+                                <Route path="/nodes" component={NodesTableStyled}/>
+                                <Route path="/settings">Settings</Route>
+                                <Redirect exact from="/" to="/system"/>
+                            </Switch>
+                        </main>
+                    </Router>
+                </div>
+            </MuiThemeProvider>
         );
     }
 }
