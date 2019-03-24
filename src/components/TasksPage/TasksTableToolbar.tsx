@@ -1,13 +1,13 @@
 import {lighten} from "@material-ui/core/styles/colorManipulator";
 import classNames from "classnames";
-import {Theme, withStyles} from "@material-ui/core";
+import {Button, Theme, withStyles} from "@material-ui/core";
 import React from "react";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import Typography from "@material-ui/core/Typography";
 import Toolbar from "@material-ui/core/Toolbar";
-import DeleteIcon from "@material-ui/icons/Delete";
 import FilterListIcon from "@material-ui/icons/FilterList";
+import {DoneOutline, RemoveCircleOutline} from "@material-ui/icons";
 
 const toolbarStyles = (theme: Theme) => ({
     root: {
@@ -56,13 +56,16 @@ const TasksTableToolbar = (props: any) => {
             </div>
             <div className={classes.spacer} />
             <div className={classes.actions}>
-                {numSelected > 0 ? (
-                    <Tooltip title="Delete">
-                        <IconButton aria-label="Delete">
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
-                ) : (
+                {numSelected > 0 ?
+                    <div style={{display: 'flex'}}>
+                        <Button>
+                            <DoneOutline style={{marginRight: '5px'}}/> Resolve
+                        </Button>
+                        <Button>
+                            <RemoveCircleOutline style={{marginRight: '5px'}}/> Reject
+                        </Button>
+                    </div>
+                : (
                     <Tooltip title="Filter list">
                         <IconButton aria-label="Filter list">
                             <FilterListIcon />

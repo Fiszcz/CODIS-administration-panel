@@ -12,6 +12,8 @@ import {Task} from "../../Client/Api";
 import {TasksTableToolbarStyled} from "./TasksTableToolbar";
 import {TasksTableHeaderStyled} from "./TasksTableHeader";
 import {TimeField} from "../TimeField/TimeField";
+import {Button, Menu, MenuItem} from "@material-ui/core";
+import {ResolveRejectModalStyled} from "../ResolveRejectModal/ResolveRejectModal";
 
 const rows = [
     { id: 'id', numeric: false, disablePadding: true, label: 'Id' },
@@ -19,6 +21,7 @@ const rows = [
     { id: 'takeTime', numeric: false, disablePadding: true, label: 'Take Time' },
     { id: 'endTime', numeric: false, disablePadding: true, label: 'End Time' },
     { id: 'node', numeric: false, disablePadding: true, label: 'Node' },
+    { id: 'action', numeric: false, disablePadding: true, label: 'Action' },
 ];
 
 interface TasksTableState {
@@ -28,6 +31,12 @@ interface TasksTableState {
     data: Task[];
     page: number;
     rowsPerPage: number;
+    anchorEl: any;
+    endTimeElementForAction: Date | null;
+    isOpenModal: boolean;
+    isResolveModal: boolean;
+    idTaskToResolveReject: string[];
+    idTaskForMenu: string;
 }
 
 const styles = () => createStyles({
@@ -71,12 +80,29 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
             }
         ],
         page: 0,
-        rowsPerPage: 5,
+        rowsPerPage: 10,
+        anchorEl: null,
+        endTimeElementForAction: null,
+        isOpenModal: false,
+        isResolveModal: true,
+        idTaskToResolveReject: [],
+        idTaskForMenu: '',
     };
 
     render() {
         const { classes } = this.props;
-        const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
+        const {
+            data,
+            order,
+            orderBy,
+            selected,
+            rowsPerPage,
+            page,
+            anchorEl,
+            isOpenModal,
+            isResolveModal,
+            idTaskToResolveReject
+        } = this.state;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
         return (
@@ -101,14 +127,17 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
                                     return (
                                         <TableRow
                                             hover
-                                            onClick={event => this.handleClick(event, n.id)}
                                             role="checkbox"
                                             aria-checked={isSelected}
                                             tabIndex={-1}
                                             key={n.id}
                                             selected={isSelected}
                                         >
-                                            <TableCell padding="checkbox" className={classes.checkboxWidth}>
+                                            <TableCell
+                                                padding="checkbox"
+                                                className={classes.checkboxWidth}
+                                                onClick={(event: React.MouseEvent) => this.handleClick(event, n.id)}
+                                            >
                                                 <Checkbox checked={isSelected} />
                                             </TableCell>
                                             <TableCell align="center" className={classes.tableCell}><b>{n.id}</b></TableCell>
@@ -122,16 +151,37 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
                                                 {TimeField({date: n.endTime})}
                                             </TableCell>
                                             <TableCell align="center" className={classes.tableCell}>{n.node}</TableCell>
+                                            <TableCell align="center" className={classes.tableCell}>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    color="primary"
+                                                    onClick={(event: React.MouseEvent<HTMLElement>) => this.handleClickAction(event, n.endTime, n.id)}
+                                                >
+                                                    Action
+                                                </Button>
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}
                             {emptyRows > 0 && (
                                 <TableRow style={{ height: 49 * emptyRows }}>
-                                    <TableCell colSpan={6} />
+                                    <TableCell colSpan={7} />
                                 </TableRow>
                             )}
                         </TableBody>
                     </Table>
+                    <Menu
+                        id="simple-menu"
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={this.handleCloseAction}
+                    >
+                        <MenuItem onClick={() => {}}>Show Task</MenuItem>
+                        {this.state.endTimeElementForAction && <MenuItem onClick={() => {}}>Show Solution</MenuItem>}
+                        {this.state.endTimeElementForAction === null && <MenuItem onClick={this.handleResolveClick}>Resolve</MenuItem>}
+                        {this.state.endTimeElementForAction === null && <MenuItem onClick={this.handleRejectClick}>Reject</MenuItem>}
+                    </Menu>
                 </div>
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25, 60, 150, 400]}
@@ -148,9 +198,27 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
                     onChangePage={this.handleChangePage}
                     onChangeRowsPerPage={this.handleChangeRowsPerPage}
                 />
+                <ResolveRejectModalStyled
+                    open={isOpenModal}
+                    idTask={idTaskToResolveReject}
+                    isResolve={isResolveModal}
+                    handleCloseModal={this.handleCloseModal}
+                />
             </Paper>
         );
     }
+
+    private handleResolveClick = () => {
+        this.setState({ isOpenModal: true, isResolveModal: true, idTaskToResolveReject: [this.state.idTaskForMenu] });
+    };
+
+    private handleRejectClick = () => {
+        this.setState({ isOpenModal: true, isResolveModal: false, idTaskToResolveReject: [this.state.idTaskForMenu] });
+    };
+
+    private handleCloseModal = () => {
+        this.setState({ isOpenModal: false });
+    };
 
     private handleRequestSort = (event: Event, property: string) => {
         const orderBy = property;
@@ -203,6 +271,14 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
 
     // @ts-ignore
     private isSelected = (id:any) => this.state.selected.indexOf(id) !== -1;
+
+    private handleClickAction = (event: React.MouseEvent<HTMLElement>, endTime: Date | null, idTask: string) => {
+        this.setState({ anchorEl: event.currentTarget, endTimeElementForAction: endTime, idTaskForMenu: idTask });
+    };
+
+    private handleCloseAction = () => {
+        this.setState({ anchorEl: null });
+    };
 
 }
 
