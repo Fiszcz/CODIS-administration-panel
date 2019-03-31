@@ -35,7 +35,7 @@ const toolbarStyles = (theme: Theme) => ({
 });
 
 const TasksTableToolbar = (props: any) => {
-    const { numSelected, classes } = props;
+    const { numSelected, classes, handleResolveClick, handleRejectClick } = props;
 
     return (
         <Toolbar
@@ -58,10 +58,10 @@ const TasksTableToolbar = (props: any) => {
             <div className={classes.actions}>
                 {numSelected > 0 ?
                     <div style={{display: 'flex'}}>
-                        <Button>
+                        <Button onClick={handleResolveClick}>
                             <DoneOutline style={{marginRight: '5px'}}/> Resolve
                         </Button>
-                        <Button>
+                        <Button onClick={handleRejectClick}>
                             <RemoveCircleOutline style={{marginRight: '5px'}}/> Reject
                         </Button>
                     </div>

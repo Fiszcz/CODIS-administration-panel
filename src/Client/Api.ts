@@ -4,7 +4,7 @@ export interface ExecutiveNode {
 }
 
 export interface Task {
-    id: string;
+    id: number;
     node: string;
     createdTime: Date | null;
     takeTime: Date | null;
@@ -19,7 +19,6 @@ export interface System {
     waitingTasks: number;
     runningTasks: number;
     nodes: number;
-    startupDate: number;
 }
 
 export interface ControlPoint {

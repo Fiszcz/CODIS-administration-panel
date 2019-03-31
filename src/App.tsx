@@ -139,7 +139,15 @@ const overrideTheme = createMuiTheme({
 interface Props extends WithStyles<typeof styles> {
 }
 
-class App extends React.Component<Props> {
+interface AppState {
+    isOpenDrawer: boolean,
+    webSocketConnection: WebSocket | undefined,
+    isOpenConnection: boolean,
+    key: string,
+    address: string,
+}
+
+class App extends React.Component<Props, AppState> {
 
     state = {
         isOpenDrawer: false,
@@ -150,11 +158,11 @@ class App extends React.Component<Props> {
     };
 
     handleDrawerOpen = () => {
-        this.setState({open: true});
+        this.setState({isOpenDrawer: true});
     };
 
     handleDrawerClose = () => {
-        this.setState({open: false});
+        this.setState({isOpenDrawer: false});
     };
 
     render() {
@@ -168,16 +176,16 @@ class App extends React.Component<Props> {
                     <AppBar
                         position="fixed"
                         className={classNames(classes.appBar, {
-                            [classes.appBarShift]: this.state.open,
+                            [classes.appBarShift]: this.state.isOpenDrawer,
                         })}
                     >
-                        <Toolbar disableGutters={!this.state.open}>
+                        <Toolbar disableGutters={!this.state.isOpenDrawer}>
                             <IconButton
                                 color="inherit"
                                 aria-label="Open drawer"
                                 onClick={this.handleDrawerOpen}
                                 className={classNames(classes.menuButton, {
-                                    [classes.hide]: this.state.open,
+                                    [classes.hide]: this.state.isOpenDrawer,
                                 })}
                             >
                                 <MenuIcon/>
@@ -185,23 +193,30 @@ class App extends React.Component<Props> {
                             <Typography variant="h6" color="inherit" noWrap style={{flexGrow: 1}}>
                                 CODIS - Administration panel
                             </Typography>
-                            <Button color="inherit" variant={'outlined'} style={{marginRight: '20px'}}>Logout</Button>
+                            <Button
+                                color="inherit"
+                                variant={'outlined'}
+                                style={{marginRight: '20px'}}
+                                onClick={this.logout}
+                            >
+                                Logout
+                            </Button>
                         </Toolbar>
                     </AppBar>
                     <Router>
                         <Drawer
                             variant="permanent"
                             className={classNames(classes.drawer, {
-                                [classes.drawerOpen]: this.state.open,
-                                [classes.drawerClose]: !this.state.open,
+                                [classes.drawerOpen]: this.state.isOpenDrawer,
+                                [classes.drawerClose]: !this.state.isOpenDrawer,
                             })}
                             classes={{
                                 paper: classNames({
-                                    [classes.drawerOpen]: this.state.open,
-                                    [classes.drawerClose]: !this.state.open,
+                                    [classes.drawerOpen]: this.state.isOpenDrawer,
+                                    [classes.drawerClose]: !this.state.isOpenDrawer,
                                 }),
                             }}
-                            open={this.state.open}
+                            open={this.state.isOpenDrawer}
                         >
                             <div className={classes.toolbar}>
                                 <IconButton onClick={this.handleDrawerClose}>

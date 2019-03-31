@@ -27,7 +27,7 @@ interface NodesTableHeaderProps {
     onSelectAllClick: any;
     order: "desc" | "asc";
     orderBy: string;
-    rowCount: number;
+    undoneRowCount: number;
 }
 
 export class TasksTableHeader extends React.Component<NodesTableHeaderProps & WithStyles<typeof styles>> {
@@ -36,15 +36,15 @@ export class TasksTableHeader extends React.Component<NodesTableHeaderProps & Wi
     };
 
     render() {
-        const { onSelectAllClick, order, orderBy, numSelected, rowCount, rows, classes } = this.props;
+        const { onSelectAllClick, order, orderBy, numSelected, undoneRowCount, rows, classes } = this.props;
 
         return (
             <TableHead>
                 <TableRow>
                     <TableCell padding="checkbox">
                         <Checkbox
-                            indeterminate={numSelected > 0 && numSelected < rowCount}
-                            checked={numSelected === rowCount}
+                            indeterminate={numSelected > 0 && numSelected < undoneRowCount}
+                            checked={numSelected === undoneRowCount}
                             onChange={onSelectAllClick}
                         />
                     </TableCell>

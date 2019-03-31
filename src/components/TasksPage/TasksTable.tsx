@@ -14,6 +14,7 @@ import {TasksTableHeaderStyled} from "./TasksTableHeader";
 import {TimeField} from "../TimeField/TimeField";
 import {Button, Menu, MenuItem} from "@material-ui/core";
 import {ResolveRejectModalStyled} from "../ResolveRejectModal/ResolveRejectModal";
+import {openInNewTab} from "../../utils/browserTab";
 
 const rows = [
     { id: 'id', numeric: false, disablePadding: true, label: 'Id' },
@@ -27,7 +28,7 @@ const rows = [
 interface TasksTableState {
     order: 'desc' | 'asc';
     orderBy: string;
-    selected: Task[];
+    selected: number[];
     data: Task[];
     page: number;
     rowsPerPage: number;
@@ -35,8 +36,8 @@ interface TasksTableState {
     endTimeElementForAction: Date | null;
     isOpenModal: boolean;
     isResolveModal: boolean;
-    idTaskToResolveReject: string[];
-    idTaskForMenu: string;
+    idTaskToResolveReject: number[];
+    idTaskForMenu: number | undefined;
 }
 
 const styles = () => createStyles({
@@ -57,28 +58,17 @@ const styles = () => createStyles({
     }
 });
 
-class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableState> {
+interface TasksTableProps extends WithStyles<typeof styles> {
+    connection: any;
+}
+
+class TasksTable extends React.Component<TasksTableProps, TasksTableState> {
 
     state = {
         order: 'asc' as 'desc' | 'asc',
         orderBy: 'startupDate',
         selected: [],
-        data: [
-            {
-                id: 'fg3k34en2k4js3',
-                createdTime: new Date(),
-                takeTime: new Date(),
-                endTime: null,
-                node: 'gfdk2jsfo32o',
-            },
-            {
-                id: 'dfk43jk2ndsk24k',
-                createdTime: new Date(),
-                takeTime: new Date(2015, 1, 12),
-                endTime: new Date(),
-                node: 'lfsl351opeodsks',
-            }
-        ],
+        data: [],
         page: 0,
         rowsPerPage: 10,
         anchorEl: null,
@@ -86,8 +76,22 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
         isOpenModal: false,
         isResolveModal: true,
         idTaskToResolveReject: [],
-        idTaskForMenu: '',
+        idTaskForMenu: undefined,
     };
+
+    componentDidMount(): void {
+        this.props.connection.onmessage = (message: { data: string; }) => {
+            const {t, task, solution} = JSON.parse(message.data);
+            if (t)
+                this.setState({data: t});
+            else if (task !== undefined) {
+                openInNewTab(task);
+            } else if (solution !== undefined) {
+                openInNewTab(solution);
+            }
+        };
+        this.props.connection.send(JSON.stringify({order: 'tasks'}));
+    }
 
     render() {
         const { classes } = this.props;
@@ -107,7 +111,11 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
 
         return (
             <Paper className={classes.root}>
-                <TasksTableToolbarStyled numSelected={selected.length} />
+                <TasksTableToolbarStyled
+                    numSelected={selected.length}
+                    handleResolveClick={this.handleResolveMultipleClick}
+                    handleRejectClick={this.handleRejectMultipleClick}
+                />
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table} aria-labelledby="tableTitle">
                         <TasksTableHeaderStyled
@@ -116,7 +124,7 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
                             orderBy={orderBy}
                             onSelectAllClick={this.handleSelectAllClick}
                             onRequestSort={this.handleRequestSort}
-                            rowCount={data.length}
+                            undoneRowCount={data.filter((task: Task) => !task.endTime).length}
                             rows={rows}
                         />
                         <TableBody>
@@ -132,23 +140,30 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
                                             tabIndex={-1}
                                             key={n.id}
                                             selected={isSelected}
+                                            style={{backgroundColor: n.endTime ? '#85e88570' : n.takeTime ? '#fffa8670' : ''}}
                                         >
                                             <TableCell
                                                 padding="checkbox"
                                                 className={classes.checkboxWidth}
                                                 onClick={(event: React.MouseEvent) => this.handleClick(event, n.id)}
                                             >
-                                                <Checkbox checked={isSelected} />
-                                            </TableCell>
-                                            <TableCell align="center" className={classes.tableCell}><b>{n.id}</b></TableCell>
-                                            <TableCell align="center" className={classes.tableCell}>
-                                                {TimeField({date: n.createdTime})}
+                                                {!n.endTime &&
+                                                <Checkbox checked={isSelected}/>
+                                                }
                                             </TableCell>
                                             <TableCell align="center" className={classes.tableCell}>
-                                                {TimeField({date: n.takeTime})}
+                                                <b>
+                                                    {n.id}
+                                                </b>
                                             </TableCell>
                                             <TableCell align="center" className={classes.tableCell}>
-                                                {TimeField({date: n.endTime})}
+                                                {n.createdTime && TimeField({date: new Date(n.createdTime)})}
+                                            </TableCell>
+                                            <TableCell align="center" className={classes.tableCell}>
+                                                {n.takeTime && TimeField({date: new Date(n.takeTime)})}
+                                            </TableCell>
+                                            <TableCell align="center" className={classes.tableCell}>
+                                                {n.endTime && TimeField({date: new Date(n.endTime)})}
                                             </TableCell>
                                             <TableCell align="center" className={classes.tableCell}>{n.node}</TableCell>
                                             <TableCell align="center" className={classes.tableCell}>
@@ -177,10 +192,16 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
                         open={Boolean(anchorEl)}
                         onClose={this.handleCloseAction}
                     >
-                        <MenuItem onClick={() => {}}>Show Task</MenuItem>
-                        {this.state.endTimeElementForAction && <MenuItem onClick={() => {}}>Show Solution</MenuItem>}
-                        {this.state.endTimeElementForAction === null && <MenuItem onClick={this.handleResolveClick}>Resolve</MenuItem>}
-                        {this.state.endTimeElementForAction === null && <MenuItem onClick={this.handleRejectClick}>Reject</MenuItem>}
+                        <MenuItem onClick={this.handleShowTaskClick}>Show Task</MenuItem>
+                        {this.state.endTimeElementForAction &&
+                        <MenuItem onClick={this.handleShowSolutionClick}>Show Solution</MenuItem>
+                        }
+                        {this.state.endTimeElementForAction === undefined &&
+                        <MenuItem onClick={this.handleResolveClick}>Resolve</MenuItem>
+                        }
+                        {this.state.endTimeElementForAction === undefined &&
+                        <MenuItem onClick={this.handleRejectClick}>Reject</MenuItem>
+                        }
                     </Menu>
                 </div>
                 <TablePagination
@@ -203,17 +224,34 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
                     idTask={idTaskToResolveReject}
                     isResolve={isResolveModal}
                     handleCloseModal={this.handleCloseModal}
+                    connection={this.props.connection}
                 />
             </Paper>
         );
     }
 
+    private handleShowSolutionClick = () => {
+        this.props.connection.send(JSON.stringify({order: 'showSolution', idTask: this.state.idTaskForMenu}));
+    };
+
+    private handleShowTaskClick = () => {
+        this.props.connection.send(JSON.stringify({order: 'showTask', idTask: this.state.idTaskForMenu}));
+    };
+
     private handleResolveClick = () => {
-        this.setState({ isOpenModal: true, isResolveModal: true, idTaskToResolveReject: [this.state.idTaskForMenu] });
+        this.setState({ isOpenModal: true, isResolveModal: true, idTaskToResolveReject: [this.state.idTaskForMenu!] });
     };
 
     private handleRejectClick = () => {
-        this.setState({ isOpenModal: true, isResolveModal: false, idTaskToResolveReject: [this.state.idTaskForMenu] });
+        this.setState({ isOpenModal: true, isResolveModal: false, idTaskToResolveReject: [this.state.idTaskForMenu!] });
+    };
+
+    private handleResolveMultipleClick = () => {
+        this.setState({ isOpenModal: true, isResolveModal: true, idTaskToResolveReject: this.state.selected });
+    };
+
+    private handleRejectMultipleClick = () => {
+        this.setState({ isOpenModal: true, isResolveModal: false, idTaskToResolveReject: this.state.selected });
     };
 
     private handleCloseModal = () => {
@@ -232,14 +270,13 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
     };
 
     private handleSelectAllClick = (event: any) => {
-        if (event.target.checked) {
-            this.setState(state => ({ selected: state.data.map((n:any) => n.id) }));
-            return;
-        }
-        this.setState({ selected: [] });
+        if (event.target.checked)
+            this.setState(state => ({selected: state.data.filter((task: Task) => !task.endTime).map((n: any) => n.id)}));
+        else
+            this.setState({selected: []});
     };
 
-    private handleClick = (event: any, id: string) => {
+    private handleClick = (event: any, id: number) => {
         const { selected } = this.state;
         // @ts-ignore
         const selectedIndex = selected.indexOf(id);
@@ -272,7 +309,7 @@ class TasksTable extends React.Component<WithStyles<typeof styles>, TasksTableSt
     // @ts-ignore
     private isSelected = (id:any) => this.state.selected.indexOf(id) !== -1;
 
-    private handleClickAction = (event: React.MouseEvent<HTMLElement>, endTime: Date | null, idTask: string) => {
+    private handleClickAction = (event: React.MouseEvent<HTMLElement>, endTime: Date | null, idTask: number) => {
         this.setState({ anchorEl: event.currentTarget, endTimeElementForAction: endTime, idTaskForMenu: idTask });
     };
 
