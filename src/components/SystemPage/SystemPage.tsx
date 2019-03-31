@@ -117,7 +117,39 @@ const exampleControlPoints: ControlPoint[] = [
     },
 ];
 
-export class SystemPage extends React.Component<WithStyles<typeof style>> {
+interface SystemPageProps extends WithStyles<typeof style> {
+    connection: WebSocket | undefined;
+}
+
+interface SystemPageState {
+    doneTasks: number;
+    executingTasks: number;
+    toDoTasks: number;
+    nodes: number;
+}
+
+export class SystemPage extends React.Component<SystemPageProps, SystemPageState> {
+
+    state = {
+        doneTasks: 0,
+        executingTasks: 0,
+        toDoTasks: 0,
+        nodes: 0,
+    };
+
+    componentDidMount(): void {
+        this.props.connection!.onmessage = (message: { data: string; }) => {
+            const {s} = JSON.parse(message.data);
+            if (s)
+                this.setState({
+                    doneTasks: s.tasks - s.waitingTasks - s.runningTasks,
+                    executingTasks: s.runningTasks,
+                    toDoTasks: s.waitingTasks,
+                    nodes: s.nodes,
+                });
+        };
+        this.props.connection!.send(JSON.stringify({order: 'system'}));
+    }
 
     render() {
         const {classes} = this.props;
@@ -129,7 +161,7 @@ export class SystemPage extends React.Component<WithStyles<typeof style>> {
                             <Done/>
                         </CardIconStyled>
                         <p className={classes.cardCategory}>Done Tasks</p>
-                        <h3 className={classes.cardTitle}>433</h3>
+                        <h3 className={classes.cardTitle}>{this.state.doneTasks}</h3>
                     </CardHeaderStyled>
                 </CardStyled>
             </GridItemStyled>
@@ -140,9 +172,7 @@ export class SystemPage extends React.Component<WithStyles<typeof style>> {
                             <Transform/>
                         </CardIconStyled>
                         <p className={classes.cardCategory}>Executing Tasks</p>
-                        <h3 className={classes.cardTitle}>
-                            43
-                        </h3>
+                        <h3 className={classes.cardTitle}>{this.state.executingTasks}</h3>
                     </CardHeaderStyled>
                 </CardStyled>
             </GridItemStyled>
@@ -153,7 +183,7 @@ export class SystemPage extends React.Component<WithStyles<typeof style>> {
                             <ListAlt/>
                         </CardIconStyled>
                         <p className={classes.cardCategory}>To Do Tasks</p>
-                        <h3 className={classes.cardTitle}>756</h3>
+                        <h3 className={classes.cardTitle}>{this.state.toDoTasks}</h3>
                     </CardHeaderStyled>
                 </CardStyled>
             </GridItemStyled>
@@ -164,7 +194,7 @@ export class SystemPage extends React.Component<WithStyles<typeof style>> {
                             <DesktopWindows/>
                         </CardIconStyled>
                         <p className={classes.cardCategory}>Nodes</p>
-                        <h3 className={classes.cardTitle}>5</h3>
+                        <h3 className={classes.cardTitle}>{this.state.nodes}</h3>
                     </CardHeaderStyled>
                 </CardStyled>
             </GridItemStyled>

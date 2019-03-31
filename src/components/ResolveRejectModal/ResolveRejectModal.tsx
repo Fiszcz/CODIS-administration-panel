@@ -20,14 +20,23 @@ const styles = (theme: Theme) => createStyles({
     },
 });
 
-interface ResolveRejectModalProps {
+interface ResolveRejectModalProps extends WithStyles<typeof styles> {
     open: boolean;
     isResolve: boolean;
     idTask: string[];
     handleCloseModal: () => void;
+    connection: WebSocket;
 }
 
-export class ResolveRejectModal extends React.Component<ResolveRejectModalProps & WithStyles<typeof styles>> {
+interface ResolveRejectModalState {
+    resolveRejectInput: string;
+}
+
+export class ResolveRejectModal extends React.Component<ResolveRejectModalProps, ResolveRejectModalState> {
+
+    state = {
+        resolveRejectInput: '',
+    };
 
     render() {
         const {open, isResolve, idTask, classes, handleCloseModal} = this.props;
@@ -35,7 +44,7 @@ export class ResolveRejectModal extends React.Component<ResolveRejectModalProps 
         return <Modal open={open} onClose={handleCloseModal}>
             <div className={classes.paper}>
                 <Typography variant="h6" id="modal-title" align={"center"}>
-                    {isResolve ? 'Resolve' : 'Reject'} Task with id: <b>{idTask}</b>
+                    {isResolve ? 'Resolve' : 'Reject'} Task with id: <b>{idTask.toString()}</b>
                 </Typography>
                 <TextField
                     id="standard-textarea"
@@ -43,13 +52,30 @@ export class ResolveRejectModal extends React.Component<ResolveRejectModalProps 
                     multiline
                     className={classes.textField}
                     margin="normal"
+                    value={this.state.resolveRejectInput}
+                    onChange={this.handleChangeResolveRejectText}
                 />
                 <div style={{display: 'flex', justifyContent: 'center', marginTop: '15px'}}>
-                    <Button variant={'outlined'}>{isResolve ? 'Resolve' : 'Reject'}</Button>
+                    <Button variant={'outlined'} onClick={this.handleResolveRejectClick}>{isResolve ? 'Resolve' : 'Reject'}</Button>
                 </div>
             </div>
         </Modal>
-    }
+    };
+
+    private handleChangeResolveRejectText = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({resolveRejectInput: event.target.value})
+    };
+
+    private handleResolveRejectClick = () => {
+        this.props.connection.send(JSON.stringify(
+            {
+                order: this.props.isResolve ? 'resolve' : 'reject',
+                idTask: this.props.idTask,
+                content: this.state.resolveRejectInput
+            }
+        ));
+        this.props.handleCloseModal();
+    };
 
 }
 

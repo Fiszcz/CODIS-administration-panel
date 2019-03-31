@@ -13,8 +13,8 @@ import {getSorting, stableSort} from "../../utils/sorting";
 import {ExecutiveNode} from "../../Client/Api";
 
 const rows = [
-    { id: 'id', numeric: false, disablePadding: true, label: 'Id' },
-    { id: 'startupDate', numeric: false, disablePadding: false, label: 'Startup Time' },
+    {id: 'id', numeric: false, disablePadding: true, label: 'Id'},
+    {id: 'startupDate', numeric: false, disablePadding: false, label: 'Startup Time'},
 ];
 
 interface NodesTableState {
@@ -41,34 +41,38 @@ const styles = () => createStyles({
     },
 });
 
-class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableState> {
+interface NodesTableProps extends WithStyles<typeof styles> {
+    connection: any;
+}
+
+class NodesTable extends React.Component<NodesTableProps, NodesTableState> {
 
     state = {
         order: 'asc' as 'desc' | 'asc',
         orderBy: 'startupDate',
         selected: [],
-        data: [
-            {
-                id: 'fg3k34en2k4js3',
-                startupDate: (new Date()).toLocaleTimeString(),
-            },
-            {
-                id: 'dfk43jk2ndsk24k',
-                startupDate: (new Date()).toLocaleTimeString(),
-            }
-        ],
+        data: [],
         page: 0,
         rowsPerPage: 10,
     };
 
+    componentDidMount(): void {
+        this.props.connection.onmessage = (message: { data: string; }) => {
+            const {n} = JSON.parse(message.data);
+            if (n)
+                this.setState({data: n});
+        };
+        this.props.connection.send(JSON.stringify({order: 'nodes'}));
+    }
+
     render() {
-        const { classes } = this.props;
-        const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
+        const {classes} = this.props;
+        const {data, order, orderBy, selected, rowsPerPage, page} = this.state;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
         return (
             <Paper className={classes.root}>
-                <NodesTableToolbarStyled numSelected={selected.length} />
+                <NodesTableToolbarStyled numSelected={selected.length}/>
                 <div className={classes.tableWrapper}>
                     <Table className={classes.table} aria-labelledby="tableTitle">
                         <NodesTablHeadereStyled
@@ -96,7 +100,7 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
                                             selected={isSelected}
                                         >
                                             <TableCell padding="checkbox" className={classes.checkboxWidth}>
-                                                <Checkbox checked={isSelected} />
+                                                <Checkbox checked={isSelected}/>
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" align="center">
                                                 <b>{n.id}</b>
@@ -106,8 +110,8 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
                                     );
                                 })}
                             {emptyRows > 0 && (
-                                <TableRow style={{ height: 49 * emptyRows }}>
-                                    <TableCell colSpan={6} />
+                                <TableRow style={{height: 49 * emptyRows}}>
+                                    <TableCell colSpan={6}/>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -140,19 +144,19 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
             order = 'asc';
         }
 
-        this.setState({ order: order as 'desc' | 'asc', orderBy });
+        this.setState({order: order as 'desc' | 'asc', orderBy});
     };
 
     private handleSelectAllClick = (event: any) => {
         if (event.target.checked) {
-            this.setState(state => ({ selected: state.data.map((n:any) => n.id) }));
+            this.setState(state => ({selected: state.data.map((n: any) => n.id)}));
             return;
         }
-        this.setState({ selected: [] });
+        this.setState({selected: []});
     };
 
     private handleClick = (event: any, id: string) => {
-        const { selected } = this.state;
+        const {selected} = this.state;
         // @ts-ignore
         const selectedIndex = selected.indexOf(id);
         let newSelected: any[] = [];
@@ -170,19 +174,19 @@ class NodesTable extends React.Component<WithStyles<typeof styles>, NodesTableSt
             );
         }
 
-        this.setState({ selected: newSelected });
+        this.setState({selected: newSelected});
     };
 
     private handleChangePage = (event: any, page: number) => {
-        this.setState({ page });
+        this.setState({page});
     };
 
-    private handleChangeRowsPerPage = (event:any) => {
-        this.setState({ rowsPerPage: event.target.value });
+    private handleChangeRowsPerPage = (event: any) => {
+        this.setState({rowsPerPage: event.target.value});
     };
 
     // @ts-ignore
-    private isSelected = (id:any) => this.state.selected.indexOf(id) !== -1;
+    private isSelected = (id: any) => this.state.selected.indexOf(id) !== -1;
 
 }
 
