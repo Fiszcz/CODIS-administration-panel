@@ -32,6 +32,7 @@ import {NodesTableStyled} from "./components/NodesPage/NodesTable";
 import {TasksTableStyled} from "./components/TasksPage/TasksTable";
 import {SystemPageStyled} from "./components/SystemPage/SystemPage";
 import {Button} from "@material-ui/core";
+import {ConnectModalStyled} from "./components/ConnectModal/ConnectModal";
 
 const drawerWidth = 240;
 
@@ -141,7 +142,11 @@ interface Props extends WithStyles<typeof styles> {
 class App extends React.Component<Props> {
 
     state = {
-        open: false,
+        isOpenDrawer: false,
+        webSocketConnection: undefined,
+        isOpenConnection: false,
+        key: '',
+        address: '',
     };
 
     handleDrawerOpen = () => {
@@ -236,19 +241,60 @@ class App extends React.Component<Props> {
                         </Drawer>
                         <main className={classes.content}>
                             <div className={classes.toolbar}/>
+                            {this.state.isOpenConnection &&
                             <Switch>
-                                <Route path="/system" component={SystemPageStyled}/>
-                                <Route path="/tasks" component={TasksTableStyled}/>
-                                <Route path="/nodes" component={NodesTableStyled}/>
+                                <Route path="/system">
+                                    <SystemPageStyled connection={this.state.webSocketConnection}/>
+                                </Route>
+                                <Route path="/tasks">
+                                    <TasksTableStyled connection={this.state.webSocketConnection}/>
+                                </Route>
+                                <Route path="/nodes">
+                                    <NodesTableStyled connection={this.state.webSocketConnection}/>
+                                </Route>
                                 <Route path="/settings">Settings</Route>
                                 <Redirect exact from="/" to="/system"/>
                             </Switch>
+                            }
                         </main>
                     </Router>
+                    <ConnectModalStyled
+                        isConnected={this.state.isOpenConnection}
+                        handleChangeAddress={this.handleChangeAddress}
+                        handleChangeKey={this.handleChangeKey}
+                        handleClickConnect={this.connect}
+                        keyToConnection={this.state.key}
+                        address={this.state.address}
+                    />
                 </div>
             </MuiThemeProvider>
         );
-    }
+    };
+
+    private logout = () => {
+        this.setState({webSocketConnection: undefined, isOpenConnection: false});
+    };
+
+    private connect = () => {
+        document.cookie = 'X-Authorization=' + this.state.key + '; path=/';
+        const webSocketConnection = new WebSocket(this.state.address, 'administration-protocol');
+        webSocketConnection.onopen = () => {
+            this.setState({isOpenConnection: true});
+        };
+        webSocketConnection.onerror = () => {
+            this.setState({isOpenConnection: false});
+        };
+        this.setState({webSocketConnection})
+    };
+
+    private handleChangeAddress = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({address: event.target.value})
+    };
+
+    private handleChangeKey = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({key: event.target.value})
+    };
+
 }
 
 export const AppWithStyles = withStyles(styles, {withTheme: true})(App);
