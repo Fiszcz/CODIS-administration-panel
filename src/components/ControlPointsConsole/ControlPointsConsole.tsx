@@ -10,7 +10,7 @@ import {
     TableRow,
     withStyles
 } from "@material-ui/core";
-import {ControlPoint} from "../../Client/Api";
+import {ControlNotification} from "../../Client/Api";
 import {TablePaginationActions} from "./TablePagination";
 
 const CustomTableCell = withStyles(theme => ({
@@ -24,7 +24,7 @@ const CustomTableCell = withStyles(theme => ({
 }))(TableCell);
 
 interface ControlPointsConsoleProps {
-    controlPoints: ControlPoint[];
+    controlPoints: ControlNotification[];
 }
 
 interface ControlPointsConsoleState {
@@ -53,9 +53,10 @@ export class ControlPointsConsole extends React.Component<ControlPointsConsolePr
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {this.props.controlPoints.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(controlPoint => (
-                            <TableRow>
-                                <CustomTableCell component="th" style={{backgroundColor: this.getValueOfColor(controlPoint.assignation)}}>
+                        {this.props.controlPoints.reverse().slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map(controlPoint => (
+                            <TableRow key={JSON.stringify(controlPoint)}>
+                                <CustomTableCell component="th" style={{backgroundColor: this.getValueOfColor(controlPoint.type)}}>
                                     <b>
                                         ({controlPoint.time.toLocaleTimeString() + ' - ' + controlPoint.time.toLocaleDateString() + '): '}
                                         &nbsp;&nbsp;
@@ -84,8 +85,8 @@ export class ControlPointsConsole extends React.Component<ControlPointsConsolePr
         );
     }
 
-    private getValueOfColor = (assignation: string) => {
-        switch (assignation) {
+    private getValueOfColor = (type: string) => {
+        switch (type) {
             case 'primary':
                 return '#1fc1d5b5';
             case 'error':
@@ -97,7 +98,7 @@ export class ControlPointsConsole extends React.Component<ControlPointsConsolePr
             case 'warning':
                 return '#fcdb0a7d';
             default:
-                return 'inherit';
+                return 'white';
         }
     };
 

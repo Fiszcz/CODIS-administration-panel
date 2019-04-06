@@ -8,7 +8,7 @@ import {grayColor, hexToRgb, successColor, whiteColor} from "../../assets/jss/ma
 import {GridItemStyled} from "../Grid/GridItem";
 import {CardStyled} from "../Card/Card";
 import {ControlPointsConsole} from "../ControlPointsConsole/ControlPointsConsole";
-import {ControlPoint} from "../../Client/Api";
+import {ControlNotification} from "../../Client/Api";
 
 const style = () => createStyles({
     successText: {
@@ -84,39 +84,6 @@ const style = () => createStyles({
     }
 });
 
-const exampleControlPoints: ControlPoint[] = [
-    {
-        message: 'dfsdfasef sdf se fse ddssds ',
-        assignation: 'primary',
-        time: new Date(),
-    },
-    {
-        message: 'geroew oer pegfkp dofkg do r ',
-        assignation: 'error',
-        time: new Date(),
-    },
-    {
-        message: 'fdgokeor eor kfdog dkfd',
-        assignation: 'warning',
-        time: new Date(),
-    },
-    {
-        message: 'fdgokeor eor kfdog dkfd',
-        assignation: '',
-        time: new Date(),
-    },
-    {
-        message: 'fdgokeor eor kfdog dkfd',
-        assignation: 'success',
-        time: new Date(),
-    },
-    {
-        message: 'fdgokeor eor kfdog dkfd kfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfdkfdog dkfd',
-        assignation: 'custom',
-        time: new Date(),
-    },
-];
-
 interface SystemPageProps extends WithStyles<typeof style> {
     connection: WebSocket | undefined;
 }
@@ -126,6 +93,7 @@ interface SystemPageState {
     executingTasks: number;
     toDoTasks: number;
     nodes: number;
+    controlNotifications: ControlNotification[];
 }
 
 export class SystemPage extends React.Component<SystemPageProps, SystemPageState> {
@@ -135,11 +103,12 @@ export class SystemPage extends React.Component<SystemPageProps, SystemPageState
         executingTasks: 0,
         toDoTasks: 0,
         nodes: 0,
+        controlNotifications: [],
     };
 
     componentDidMount(): void {
         this.props.connection!.onmessage = (message: { data: string; }) => {
-            const {s} = JSON.parse(message.data);
+            const {s, n} = JSON.parse(message.data);
             if (s)
                 this.setState({
                     doneTasks: s.tasks - s.waitingTasks - s.runningTasks,
@@ -147,12 +116,23 @@ export class SystemPage extends React.Component<SystemPageProps, SystemPageState
                     toDoTasks: s.waitingTasks,
                     nodes: s.nodes,
                 });
+            if (n)
+                this.setState((prevState) => {
+                    return {
+                        controlNotifications: prevState.controlNotifications.concat(n.map((controlNotification: any) => {
+                            return {...controlNotification, time: new Date(controlNotification.time)}
+                        })),
+                    }
+                });
         };
         this.props.connection!.send(JSON.stringify({order: 'system'}));
     }
 
     render() {
         const {classes} = this.props;
+        const {doneTasks, executingTasks, toDoTasks, nodes, controlNotifications} = this.state;
+        console.log(JSON.stringify(controlNotifications));
+
         return <GridContainerStyled>
             <GridItemStyled xs={12} sm={6} md={3}>
                 <CardStyled>
@@ -161,7 +141,7 @@ export class SystemPage extends React.Component<SystemPageProps, SystemPageState
                             <Done/>
                         </CardIconStyled>
                         <p className={classes.cardCategory}>Done Tasks</p>
-                        <h3 className={classes.cardTitle}>{this.state.doneTasks}</h3>
+                        <h3 className={classes.cardTitle}>{doneTasks}</h3>
                     </CardHeaderStyled>
                 </CardStyled>
             </GridItemStyled>
@@ -172,7 +152,7 @@ export class SystemPage extends React.Component<SystemPageProps, SystemPageState
                             <Transform/>
                         </CardIconStyled>
                         <p className={classes.cardCategory}>Executing Tasks</p>
-                        <h3 className={classes.cardTitle}>{this.state.executingTasks}</h3>
+                        <h3 className={classes.cardTitle}>{executingTasks}</h3>
                     </CardHeaderStyled>
                 </CardStyled>
             </GridItemStyled>
@@ -183,7 +163,7 @@ export class SystemPage extends React.Component<SystemPageProps, SystemPageState
                             <ListAlt/>
                         </CardIconStyled>
                         <p className={classes.cardCategory}>To Do Tasks</p>
-                        <h3 className={classes.cardTitle}>{this.state.toDoTasks}</h3>
+                        <h3 className={classes.cardTitle}>{toDoTasks}</h3>
                     </CardHeaderStyled>
                 </CardStyled>
             </GridItemStyled>
@@ -194,12 +174,12 @@ export class SystemPage extends React.Component<SystemPageProps, SystemPageState
                             <DesktopWindows/>
                         </CardIconStyled>
                         <p className={classes.cardCategory}>Nodes</p>
-                        <h3 className={classes.cardTitle}>{this.state.nodes}</h3>
+                        <h3 className={classes.cardTitle}>{nodes}</h3>
                     </CardHeaderStyled>
                 </CardStyled>
             </GridItemStyled>
             <GridItemStyled xs={12}>
-                <ControlPointsConsole controlPoints={exampleControlPoints}/>
+                <ControlPointsConsole controlPoints={controlNotifications}/>
             </GridItemStyled>
         </GridContainerStyled>
     }

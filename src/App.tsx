@@ -293,12 +293,17 @@ class App extends React.Component<Props, AppState> {
     private connect = () => {
         document.cookie = 'X-Authorization=' + this.state.key + '; path=/';
         const webSocketConnection = new WebSocket(this.state.address, 'administration-protocol');
+
         webSocketConnection.onopen = () => {
             this.setState({isOpenConnection: true});
         };
         webSocketConnection.onerror = () => {
             this.setState({isOpenConnection: false});
         };
+        webSocketConnection.onclose = () => {
+            this.setState({isOpenConnection: false});
+        };
+
         this.setState({webSocketConnection})
     };
 
