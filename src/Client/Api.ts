@@ -21,8 +21,8 @@ export interface System {
     nodes: number;
 }
 
-export interface ControlPoint {
+export interface ControlNotification {
     time: Date;
     message: string;
-    assignation: 'primary' | 'warning' | 'error' | 'success' | 'custom' | '';
+    type: 'primary' | 'warning' | 'error' | 'success' | 'custom' | 'info' | '';
 }
