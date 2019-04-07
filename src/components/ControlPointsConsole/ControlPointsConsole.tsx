@@ -32,7 +32,7 @@ interface ControlPointsConsoleState {
     page: number;
 }
 
-export class ControlPointsConsole extends React.Component<ControlPointsConsoleProps, ControlPointsConsoleState> {
+export class ControlPointsConsole extends React.PureComponent<ControlPointsConsoleProps, ControlPointsConsoleState> {
 
     state = {
         rowsPerPage: 10,
@@ -41,6 +41,7 @@ export class ControlPointsConsole extends React.Component<ControlPointsConsolePr
 
     render() {
         const {rowsPerPage, page} = this.state;
+        const reversedControlPoints = this.reverseArray(this.props.controlPoints); // TODO: display array without reversing
 
         return (
             <Paper style={{width: '100%'}}>
@@ -48,12 +49,12 @@ export class ControlPointsConsole extends React.Component<ControlPointsConsolePr
                     <TableHead>
                         <TableRow>
                             <CustomTableCell style={{fontSize: '15px', borderTopRightRadius: '5px', borderTopLeftRadius: '5px'}}>
-                                Main thread console
+                                Master thread console
                             </CustomTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {this.props.controlPoints.reverse().slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        {reversedControlPoints.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map(controlPoint => (
                             <TableRow key={JSON.stringify(controlPoint)}>
                                 <CustomTableCell component="th" style={{backgroundColor: this.getValueOfColor(controlPoint.type)}}>
@@ -109,5 +110,13 @@ export class ControlPointsConsole extends React.Component<ControlPointsConsolePr
     private handleChangeRowsPerPage = (event: any) => {
         this.setState({ page: 0, rowsPerPage: event.target.value });
     };
+
+    private reverseArray = (arr: any[]) => {
+        let newArray = [];
+        for (let iterator = arr.length - 1; iterator >= 0; iterator--) {
+            newArray.push(arr[iterator]);
+        }
+        return newArray;
+    }
 
 }

@@ -131,7 +131,6 @@ export class SystemPage extends React.Component<SystemPageProps, SystemPageState
     render() {
         const {classes} = this.props;
         const {doneTasks, executingTasks, toDoTasks, nodes, controlNotifications} = this.state;
-        console.log(JSON.stringify(controlNotifications));
 
         return <GridContainerStyled>
             <GridItemStyled xs={12} sm={6} md={3}>
