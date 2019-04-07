@@ -267,7 +267,6 @@ class App extends React.Component<Props, AppState> {
                                 <Route path="/nodes">
                                     <NodesTableStyled connection={this.state.webSocketConnection}/>
                                 </Route>
-                                <Route path="/settings">Settings</Route>
                                 <Redirect exact from="/" to="/system"/>
                             </Switch>
                             }
