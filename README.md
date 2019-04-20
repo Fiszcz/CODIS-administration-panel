@@ -40,7 +40,7 @@ Make sure that **CODIS-MASTER** enable API sharing in the configuration.
 
 ## Screenshots
 
-<img src="https://raw.githubusercontent.com/fiszcz/CODIS-administration-panel/master/screenshots/login.png">
+<img src="https://raw.githubusercontent.com/Fiszcz/CODIS-administration-panel/master/screenshots/login.png">
 
 <img src="https://raw.githubusercontent.com/fiszcz/CODIS-administration-panel/master/screenshots/system.png">
 
