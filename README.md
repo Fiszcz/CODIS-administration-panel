@@ -42,16 +42,16 @@ Make sure that **CODIS-MASTER** enable API sharing in the configuration.
 
 <img src="https://raw.githubusercontent.com/Fiszcz/CODIS-administration-panel/master/screenshots/login.png">
 
-<img src="https://raw.githubusercontent.com/fiszcz/CODIS-administration-panel/master/screenshots/system.png">
+<img src="https://raw.githubusercontent.com/Fiszcz/CODIS-administration-panel/master/screenshots/system.png">
 
-<img src="https://raw.githubusercontent.com/fiszcz/CODIS-administration-panel/master/screenshots/tasks.png">
+<img src="https://raw.githubusercontent.com/Fiszcz/CODIS-administration-panel/master/screenshots/tasks.png">
 Tasks marked in green indicate that the task has been solved.
 
 Task in yellow color that the task is still performed.
 
-<img src="https://raw.githubusercontent.com/fiszcz/CODIS-administration-panel/master/screenshots/resolve.png">
+<img src="https://raw.githubusercontent.com/Fiszcz/CODIS-administration-panel/master/screenshots/resolve.png">
 
-<img src="https://raw.githubusercontent.com/fiszcz/CODIS-administration-panel/master/screenshots/nodes.png">
+<img src="https://raw.githubusercontent.com/Fiszcz/CODIS-administration-panel/master/screenshots/nodes.png">
 
 ## Notices
 
