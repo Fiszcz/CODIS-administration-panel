@@ -1,6 +1,6 @@
 {
   "name": "codis-administration-panel",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Filip Szcześniak",
   "dependencies": {
     "express": "^4.16.4"
