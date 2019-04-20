@@ -9,10 +9,10 @@ export const serveAdministrationPanel = () => {
         res.sendFile(path.join(__dirname, '../build', 'index.html'));
     });
 
-    app.listen(9000);
+    app.listen(9928);
 
     console.log('-------------------------------------------');
-    console.log('CODIS Administration Panel - localhost:9000');
+    console.log('CODIS Administration Panel - localhost:9928');
     console.log('-------------------------------------------');
 };
 
